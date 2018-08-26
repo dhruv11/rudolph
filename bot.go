@@ -71,9 +71,9 @@ func execute(text string, prefix string) string {
 	} else if text == "make me laugh" {
 		response = getDadJoke()
 	} else if strings.HasPrefix(text, "help") {
-		response = GetHelpText()
+		response = getHelpText()
 	} else {
-		response = GetHelpText()
+		response = getHelpText()
 	}
 
 	return response
@@ -110,7 +110,7 @@ func addIdea(title string, client trelloClient) (string, error) {
 	return "easy, your idea is in there!", nil
 }
 
-func GetHelpText() string {
+func getHelpText() string {
 	// TODO: move this string to a better place
 	helpText := "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help \n Feature request - @dhruv <request>"
 
