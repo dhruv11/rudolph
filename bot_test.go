@@ -17,10 +17,16 @@ func TestGetHelpText(t *testing.T) {
 }
 
 type testTrelloClient struct {
+	unhappyPath      bool
+	expectedCardName string
 }
 
-func (testTrelloClient) CreateCard(card *trello.Card, extraArgs trello.Arguments) error {
-	if card.Name != "testing" {
+func (client testTrelloClient) CreateCard(card *trello.Card, extraArgs trello.Arguments) error {
+	if client.unhappyPath {
+		return errors.New("unhappy")
+	}
+
+	if card.Name != client.expectedCardName {
 		return errors.New("card name is incorrect")
 	}
 	return nil
@@ -29,12 +35,20 @@ func (testTrelloClient) CreateCard(card *trello.Card, extraArgs trello.Arguments
 func TestAddIdea(t *testing.T) {
 	expected := "easy, your idea is in there!"
 
-	actual, err := addIdea("testing", testTrelloClient{})
+	actual, err := addIdea("add testing", testTrelloClient{expectedCardName: "testing"})
 
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 	if actual != expected {
-		t.Errorf("List name was incorrect, got: %s, want: %s.", actual, expected)
+		t.Errorf("list name is incorrect, got: %s, want: %s.", actual, expected)
+	}
+}
+
+func TestAddIdeaUnhappy(t *testing.T) {
+	_, err := addIdea("add testing", testTrelloClient{unhappyPath: true})
+
+	if err == nil {
+		t.Errorf("expected an error")
 	}
 }

@@ -100,6 +100,7 @@ type trelloClient interface {
 
 func addIdea(title string, client trelloClient) (string, error) {
 	title = strings.TrimPrefix(title, "add")
+	title = strings.TrimSpace(title)
 
 	err := client.CreateCard(&trello.Card{Name: title, IDList: "5b613db79ea6a782ac173a48"}, trello.Defaults())
 	if err != nil {
