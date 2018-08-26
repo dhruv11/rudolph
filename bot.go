@@ -67,7 +67,7 @@ func execute(text string, prefix string) string {
 	} else if strings.HasSuffix(text, "ideas") {
 		response = getListItems("5b613db79ea6a782ac173a48")
 	} else if strings.HasPrefix(text, "add") {
-		response = addIdea(text)
+		response, _ = addIdea(text, establishTrelloConnection())
 	} else if text == "make me laugh" {
 		response = getDadJoke()
 	} else if strings.HasPrefix(text, "help") {
@@ -94,15 +94,19 @@ func getListItems(listID string) string {
 	return response.String()
 }
 
-func addIdea(title string) string {
-	client := establishTrelloConnection()
+type trelloClient interface {
+	CreateCard(card *trello.Card, extraArgs trello.Arguments) error
+}
 
-	list, _ := client.GetList("5b613db79ea6a782ac173a48", trello.Defaults())
+func addIdea(title string, client trelloClient) (string, error) {
 	title = strings.TrimPrefix(title, "add")
 
-	list.AddCard(&trello.Card{Name: title}, trello.Defaults())
+	err := client.CreateCard(&trello.Card{Name: title, IDList: "5b613db79ea6a782ac173a48"}, trello.Defaults())
+	if err != nil {
+		return "", err
+	}
 
-	return "easy, your idea is in there!"
+	return "easy, your idea is in there!", nil
 }
 
 func GetHelpText() string {
