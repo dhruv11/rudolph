@@ -7,8 +7,11 @@ language: go
 language: go
 sudo: false
 go:
-  - 1.10
+  - "1.10"
 
 before_install:
   - go get github.com/adlio/trello
   - go get github.com/nlopes/slack
+
+script:
+  - go build
