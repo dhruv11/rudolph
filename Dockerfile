@@ -10,6 +10,6 @@ RUN go get github.com/adlio/trello
 
 RUN go get github.com/nlopes/slack
 
-RUN go build ./bot.go
+RUN go build ./main.go
 
-CMD ["./bot"]
+CMD ["./main"]
