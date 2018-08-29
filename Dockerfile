@@ -1,15 +1,9 @@
-FROM golang
+FROM alpine:3.4
 
-RUN mkdir -p /app
+RUN apk add --no-cache ca-certificates
 
 WORKDIR /app
 
-ADD . /app
+ADD main /app/
 
-RUN go get github.com/adlio/trello
-
-RUN go get github.com/nlopes/slack
-
-RUN go build ./main.go
-
-CMD ["./main"]
+ENTRYPOINT ["./main"]
