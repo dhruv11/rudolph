@@ -14,5 +14,4 @@ before_install:
   - go get github.com/nlopes/slack
 
 script:
-  - go build -v
   - go test -v
