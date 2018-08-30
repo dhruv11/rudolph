@@ -1,11 +1,10 @@
-# This is a weird way of telling Travis to use the fast container-based test
-# runner instead of the slow VM-based runner.
-sudo: false
+sudo: required
 
 language: go
 
-language: go
-sudo: false
+services:
+  - docker
+
 go:
   - "1.10"
 
@@ -15,3 +14,5 @@ before_install:
 
 script:
   - go test -v
+  - go build main.go
+  - docker build -t dhruvdhir/bot .
