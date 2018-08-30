@@ -14,5 +14,5 @@ before_install:
 
 script:
   - go test -v
-  - go build main.go
+  - GOOS=linux GOARCH=amd64 go build main.go
   - docker build -t dhruvdhir/bot .
