@@ -15,4 +15,6 @@ before_install:
 script:
   - go test -v
   - GOOS=linux GOARCH=amd64 go build main.go
-  - docker build -t dhruvdhir/bot .
+  - docker build -t dhruvdhir/bot:travis .
+  - echo "$password" | docker login -u "$username" --password-stdin
+  - docker push dhruvdhir/bot:travis
