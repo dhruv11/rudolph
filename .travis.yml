@@ -23,3 +23,4 @@ script:
   - docker build -t dhruvdhir/bot:1.0.$TRAVIS_BUILD_NUMBER -t dhruvdhir/bot:latest .
   - echo "$password" | docker login -u "$username" --password-stdin
   - docker push dhruvdhir/bot:latest
+  - docker push dhruvdhir/bot:1.0.$TRAVIS_BUILD_NUMBER
