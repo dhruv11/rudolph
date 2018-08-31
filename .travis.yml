@@ -12,6 +12,11 @@ before_install:
   - go get github.com/adlio/trello
   - go get github.com/nlopes/slack
 
+addons:
+  apt:
+    packages:
+      - docker-ce
+
 script:
   - go test -v
   - GOOS=linux GOARCH=amd64 go build main.go
