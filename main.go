@@ -9,6 +9,7 @@ import (
 
 	"github.com/adlio/trello"
 	"github.com/nlopes/slack"
+	"github.com/pkg/errors"
 )
 
 // TODO: unit test and refactor, error handling
@@ -38,8 +39,12 @@ Loop:
 				prefix := fmt.Sprintf("<@%s> ", info.User.ID)
 
 				if ev.User != info.User.ID && strings.HasPrefix(ev.Text, prefix) {
-					response := execute(ev.Text, prefix)
-					rtm.SendMessage(rtm.NewOutgoingMessage(response, ev.Channel))
+					response, err := execute(ev.Text, prefix)
+					if err != nil {
+						fmt.Printf("Error: %s\n", err)
+					} else {
+						rtm.SendMessage(rtm.NewOutgoingMessage(response, ev.Channel))
+					}
 				}
 
 			case *slack.RTMError:
@@ -56,42 +61,41 @@ Loop:
 	}
 }
 
-func execute(text string, prefix string) string {
-	var response string
+func execute(text string, prefix string) (string, error) {
 	text = strings.TrimPrefix(text, prefix)
 	text = strings.TrimSpace(text)
 	text = strings.ToLower(text)
 
 	if strings.HasSuffix(text, "scheduled") {
-		response = getListItems("5b613dbfd923da512f85263b")
+		return getListItems("5b613dbfd923da512f85263b")
 	} else if strings.HasSuffix(text, "ideas") {
-		response = getListItems("5b613db79ea6a782ac173a48")
+		return getListItems("5b613db79ea6a782ac173a48")
 	} else if strings.HasPrefix(text, "add") {
-		response, _ = addIdea(text, establishTrelloConnection())
+		return addIdea(text, establishTrelloConnection())
 	} else if text == "make me laugh" {
-		response = getDadJoke()
-	} else if strings.HasPrefix(text, "help") {
-		response = getHelpText()
-	} else {
-		response = getHelpText()
+		return getDadJoke()
 	}
-
-	return response
+	return getHelpText(), nil
 }
 
-func getListItems(listID string) string {
+func getListItems(listID string) (string, error) {
 	client := establishTrelloConnection()
+	list, err := client.GetList(listID, trello.Defaults())
+	if err != nil {
+		return "", err
+	}
+	cards, err := list.GetCards(trello.Defaults())
+	if err != nil {
+		return "", err
+	}
+
 	var response strings.Builder
-
-	list, _ := client.GetList(listID, trello.Defaults())
-	cards, _ := list.GetCards(trello.Defaults())
-
 	for _, card := range cards {
 		response.WriteString(card.Name)
 		response.WriteString("\n")
 	}
 
-	return response.String()
+	return response.String(), nil
 }
 
 type trelloClient interface {
@@ -117,18 +121,26 @@ func getHelpText() string {
 	return helpText
 }
 
-func getDadJoke() string {
+func getDadJoke() (string, error) {
 	client := &http.Client{}
 
-	req, _ := http.NewRequest("GET", "https://icanhazdadjoke.com/", nil)
+	req, err := http.NewRequest("GET", "https://icanhazdadjoke.com/", nil)
+	if err != nil {
+		return "", err
+	}
 	req.Header.Add("Accept", "text/plain")
 
-	response, _ := client.Do(req)
+	response, err := client.Do(req)
+	if err != nil {
+		return "", errors.Wrap(err, fmt.Sprintf("Could not make request for %s", req.URL))
+	}
 
-	data, _ := ioutil.ReadAll(response.Body)
-	responseString := string(data)
-
-	return responseString
+	data, err := ioutil.ReadAll(response.Body)
+	defer response.Body.Close()
+	if err != nil {
+		return "", errors.Wrap(err, fmt.Sprintf("Could not read request for %s", req.URL))
+	}
+	return string(data), nil
 }
 
 func establishTrelloConnection() *trello.Client {
@@ -136,6 +148,5 @@ func establishTrelloConnection() *trello.Client {
 	appKey := os.Getenv("TRELLO_KEY")
 	token := os.Getenv("TRELLO_TOKEN")
 
-	client := trello.NewClient(appKey, token)
-	return client
+	return trello.NewClient(appKey, token)
 }
