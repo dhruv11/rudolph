@@ -20,7 +20,6 @@ addons:
 script:
   - go test -v
   - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build main.go
-  - ls
   - docker build -t dhruvdhir/bot:travis .
   - echo "$password" | docker login -u "$username" --password-stdin
   - docker push dhruvdhir/bot:travis
