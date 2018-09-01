@@ -1,0 +1,8 @@
+github.com/adlio/trello v0.0.0-20180621142300-8a458717123e h1:i5+hZJx4iTPT4+ojV5zi50UIPUxs7CH8r+P3BFB4Ofs=
+github.com/adlio/trello v0.0.0-20180621142300-8a458717123e/go.mod h1:VjzhFGdnEJGih1AsIWi/yU6y01yZh0DuEWCNAyOJ1WE=
+github.com/gorilla/websocket v1.3.0 h1:r/LXc0VJIMd0rCMsc6DxgczaQtoCwCLatnfXmSYcXx8=
+github.com/gorilla/websocket v1.3.0/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoAMk2YaljkQ=
+github.com/nlopes/slack v0.3.0 h1:jCxvaS8wC4Bb1jnbqZMjCDkOOgy4spvQWcrw/TF0L0E=
+github.com/nlopes/slack v0.3.0/go.mod h1:jVI4BBK3lSktibKahxBF74txcK2vyvkza1z/+rRnVAM=
+github.com/pkg/errors v0.8.0 h1:WdK/asTD0HN+q6hsWO3/vpuAkAr+tw6aNJNDFFf0+qw=
+github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
