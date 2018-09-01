@@ -10,8 +10,6 @@ go:
 
 before_install:
   - export GO111MODULE=on
-  - go get github.com/adlio/trello
-  - go get github.com/nlopes/slack
 
 addons:
   apt:
