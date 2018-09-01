@@ -19,8 +19,8 @@ addons:
 
 script:
   - go test -v
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build main.go; fi'
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then docker build -t dhruvdhir/rudolph:1.0.$TRAVIS_BUILD_NUMBER -t dhruvdhir/rudolph:latest .; fi'
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then echo "$password" | docker login -u "$username" --password-stdin; fi'
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then docker push dhruvdhir/rudolph:latest; fi' 
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then docker push dhruvdhir/rudolph:1.0.$TRAVIS_BUILD_NUMBER; fi'
+  - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build main.go
+  - docker build -t dhruvdhir/rudolph:1.0.$TRAVIS_BUILD_NUMBER -t dhruvdhir/rudolph:latest .
+  - echo "$password" | docker login -u "$username" --password-stdin
+  - docker push dhruvdhir/rudolph:latest
+  - docker push dhruvdhir/rudolph:1.0.$TRAVIS_BUILD_NUMBER
