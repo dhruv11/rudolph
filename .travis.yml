@@ -8,17 +8,14 @@ services:
 go:
   - "1.11"
 
-before_install:
-  - export GO111MODULE=on
-
 addons:
   apt:
     packages:
       - docker-ce
 
 script:
-  - go test -v
-  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build main.go || [ ${TRAVIS_PULL_REQUEST} != "false" ]'
+  - env GO111MODULE=on go test -v
+  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && env GO111MODULE=on GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build main.go || [ ${TRAVIS_PULL_REQUEST} != "false" ]'
   - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && docker build -t dhruvdhir/rudolph:1.0.$TRAVIS_BUILD_NUMBER -t dhruvdhir/rudolph:latest . || [ ${TRAVIS_PULL_REQUEST} != "false" ]'
   - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && echo "$password" | docker login -u "$username" --password-stdin || [ ${TRAVIS_PULL_REQUEST} != "false" ]'
   - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && docker push dhruvdhir/rudolph:latest || [ ${TRAVIS_PULL_REQUEST} != "false" ]'
