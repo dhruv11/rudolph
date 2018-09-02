@@ -15,6 +15,8 @@ import (
 const ideasListID = "5b613db79ea6a782ac173a48"
 const scheduledListID = "5b613dbfd923da512f85263b"
 
+var client *trello.Client
+
 func main() {
 
 	token := os.Getenv("SLACK_TOKEN")
@@ -73,7 +75,7 @@ func execute(text string, prefix string) (string, error) {
 	} else if strings.HasSuffix(text, "ideas") {
 		return getListItems(ideasListID)
 	} else if strings.HasPrefix(text, "add") {
-		return addIdea(text, establishTrelloConnection())
+		return addIdea(text, getTrelloClient())
 	} else if text == "make me laugh" {
 		return getDadJoke()
 	}
@@ -81,7 +83,7 @@ func execute(text string, prefix string) (string, error) {
 }
 
 func getListItems(listID string) (string, error) {
-	client := establishTrelloConnection()
+	client := getTrelloClient()
 	list, err := client.GetList(listID, trello.Defaults())
 	if err != nil {
 		return "", err
@@ -145,10 +147,12 @@ func getDadJoke() (string, error) {
 	return string(data), nil
 }
 
-func establishTrelloConnection() *trello.Client {
-	// TODO: re-use connection
-	appKey := os.Getenv("TRELLO_KEY")
-	token := os.Getenv("TRELLO_TOKEN")
+func getTrelloClient() *trello.Client {
+	if client == nil {
+		appKey := os.Getenv("TRELLO_KEY")
+		token := os.Getenv("TRELLO_TOKEN")
 
-	return trello.NewClient(appKey, token)
+		client = trello.NewClient(appKey, token)
+	}
+	return client
 }
