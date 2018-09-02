@@ -43,7 +43,7 @@ Loop:
 				prefix := fmt.Sprintf("<@%s> ", info.User.ID)
 
 				if ev.User != info.User.ID && strings.HasPrefix(ev.Text, prefix) {
-					response, err := execute(ev.Text, prefix)
+					response, err := execute(ev.Text, prefix, getListItems, addIdea, getHelp, getDadJoke)
 					if err != nil {
 						fmt.Printf("Error: %s\n", err)
 					} else {
@@ -65,7 +65,8 @@ Loop:
 	}
 }
 
-func execute(text string, prefix string) (string, error) {
+func execute(text string, prefix string, getListItems listGetter,
+	addIdea cardCreator, getHelp helpGetter, getDadJoke jokeGetter) (string, error) {
 	text = strings.TrimPrefix(text, prefix)
 	text = strings.TrimSpace(text)
 	text = strings.ToLower(text)
@@ -79,8 +80,10 @@ func execute(text string, prefix string) (string, error) {
 	} else if text == "make me laugh" {
 		return getDadJoke()
 	}
-	return getHelpText(), nil
+	return getHelp(), nil
 }
+
+type listGetter func(listID string) (string, error)
 
 func getListItems(listID string) (string, error) {
 	client := getTrelloClient()
@@ -106,6 +109,8 @@ type trelloClient interface {
 	CreateCard(card *trello.Card, extraArgs trello.Arguments) error
 }
 
+type cardCreator func(title string, client trelloClient) (string, error)
+
 func addIdea(title string, client trelloClient) (string, error) {
 	title = strings.TrimPrefix(title, "add")
 	title = strings.TrimSpace(title)
@@ -118,11 +123,15 @@ func addIdea(title string, client trelloClient) (string, error) {
 	return "easy, your idea is in there!", nil
 }
 
-func getHelpText() string {
+type helpGetter func() string
+
+func getHelp() string {
 	helpText := "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help \n Feature request - @dhruv <request>"
 
 	return helpText
 }
+
+type jokeGetter func() (string, error)
 
 func getDadJoke() (string, error) {
 	client := &http.Client{}
