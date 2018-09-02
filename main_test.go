@@ -70,6 +70,19 @@ func TestExecuteGetHelp(t *testing.T) {
 	}
 }
 
+func TestExecuteGetHelpDefault(t *testing.T) {
+	expected := "helpText"
+
+	actual, err := execute("rudolph blah", "rudolph", nil, nil, getHelpStub, nil)
+
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	if actual != expected {
+		t.Errorf("help text is incorrect, got: %s, want: %s.", actual, expected)
+	}
+}
+
 func getDadJokeStub() (string, error) {
 	return "joke", nil
 }
