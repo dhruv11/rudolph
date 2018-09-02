@@ -12,7 +12,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// TODO: unit test and refactor, error handling
+const ideasListID = "5b613db79ea6a782ac173a48"
+const scheduledListID = "5b613dbfd923da512f85263b"
+
 func main() {
 
 	token := os.Getenv("SLACK_TOKEN")
@@ -67,9 +69,9 @@ func execute(text string, prefix string) (string, error) {
 	text = strings.ToLower(text)
 
 	if strings.HasSuffix(text, "scheduled") {
-		return getListItems("5b613dbfd923da512f85263b")
+		return getListItems(scheduledListID)
 	} else if strings.HasSuffix(text, "ideas") {
-		return getListItems("5b613db79ea6a782ac173a48")
+		return getListItems(ideasListID)
 	} else if strings.HasPrefix(text, "add") {
 		return addIdea(text, establishTrelloConnection())
 	} else if text == "make me laugh" {
@@ -106,7 +108,7 @@ func addIdea(title string, client trelloClient) (string, error) {
 	title = strings.TrimPrefix(title, "add")
 	title = strings.TrimSpace(title)
 
-	err := client.CreateCard(&trello.Card{Name: title, IDList: "5b613db79ea6a782ac173a48"}, trello.Defaults())
+	err := client.CreateCard(&trello.Card{Name: title, IDList: ideasListID}, trello.Defaults())
 	if err != nil {
 		return "", err
 	}
