@@ -3,8 +3,6 @@ package main
 import (
 	"errors"
 	"testing"
-
-	"github.com/adlio/trello"
 )
 
 func TestGetHelpText(t *testing.T) {
@@ -21,15 +19,20 @@ type testTrelloClient struct {
 	expectedCardName string
 }
 
-func (client testTrelloClient) CreateCard(card *trello.Card, extraArgs trello.Arguments) error {
+func (client testTrelloClient) CreateCard(title string, listID string) error {
 	if client.unhappyPath {
 		return errors.New("unhappy")
 	}
 
-	if card.Name != client.expectedCardName {
+	if title != client.expectedCardName {
 		return errors.New("card name is incorrect")
 	}
 	return nil
+}
+
+// TODO: mock out and write unit tests for getListItems
+func (client testTrelloClient) GetCardTitles(listID string) ([]string, error) {
+	return nil, nil
 }
 
 func TestAddIdea(t *testing.T) {
@@ -100,7 +103,7 @@ func TestExecuteGetJoke(t *testing.T) {
 	}
 }
 
-func getListItemsStub(listID string) (string, error) {
+func getListItemsStub(listID string, client trelloClientAdapter) (string, error) {
 	return "card1\ncard2", nil
 }
 
@@ -117,7 +120,7 @@ func TestExecuteGetList(t *testing.T) {
 	}
 }
 
-func addIdeaStub(title string, client trelloClient) (string, error) {
+func addIdeaStub(title string, client trelloClientAdapter) (string, error) {
 	return "done", nil
 }
 

@@ -15,7 +15,7 @@ import (
 const ideasListID = "5b613db79ea6a782ac173a48"
 const scheduledListID = "5b613dbfd923da512f85263b"
 
-var client *trello.Client
+var client trelloClientAdapter
 
 func main() {
 
@@ -72,9 +72,9 @@ func execute(text string, prefix string, getListItems listGetter,
 	text = strings.ToLower(text)
 
 	if strings.HasSuffix(text, "scheduled") {
-		return getListItems(scheduledListID)
+		return getListItems(scheduledListID, getTrelloClient())
 	} else if strings.HasSuffix(text, "ideas") {
-		return getListItems(ideasListID)
+		return getListItems(ideasListID, getTrelloClient())
 	} else if strings.HasPrefix(text, "add") {
 		return addIdea(text, getTrelloClient())
 	} else if text == "make me laugh" {
@@ -83,39 +83,30 @@ func execute(text string, prefix string, getListItems listGetter,
 	return getHelp(), nil
 }
 
-type listGetter func(listID string) (string, error)
+type listGetter func(listID string, client trelloClientAdapter) (string, error)
 
-func getListItems(listID string) (string, error) {
-	client := getTrelloClient()
-	list, err := client.GetList(listID, trello.Defaults())
-	if err != nil {
-		return "", err
-	}
-	cards, err := list.GetCards(trello.Defaults())
+func getListItems(listID string, client trelloClientAdapter) (string, error) {
+	titles, err := client.GetCardTitles(listID)
 	if err != nil {
 		return "", err
 	}
 
 	var response strings.Builder
-	for _, card := range cards {
-		response.WriteString(card.Name)
+	for _, t := range titles {
+		response.WriteString(t)
 		response.WriteString("\n")
 	}
 
 	return response.String(), nil
 }
 
-type trelloClient interface {
-	CreateCard(card *trello.Card, extraArgs trello.Arguments) error
-}
+type cardCreator func(title string, client trelloClientAdapter) (string, error)
 
-type cardCreator func(title string, client trelloClient) (string, error)
-
-func addIdea(title string, client trelloClient) (string, error) {
+func addIdea(title string, client trelloClientAdapter) (string, error) {
 	title = strings.TrimPrefix(title, "add")
 	title = strings.TrimSpace(title)
 
-	err := client.CreateCard(&trello.Card{Name: title, IDList: ideasListID}, trello.Defaults())
+	err := client.CreateCard(title, ideasListID)
 	if err != nil {
 		return "", err
 	}
@@ -155,12 +146,47 @@ func getDadJoke() (string, error) {
 	return string(data), nil
 }
 
-func getTrelloClient() *trello.Client {
+type trelloClientAdapter interface {
+	CreateCard(title string, listID string) error
+	GetCardTitles(listID string) ([]string, error)
+}
+
+type trelloClient struct {
+	client *trello.Client
+}
+
+func (client trelloClient) CreateCard(title string, listID string) error {
+	err := client.client.CreateCard(&trello.Card{Name: title, IDList: listID}, trello.Defaults())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (client trelloClient) GetCardTitles(listID string) ([]string, error) {
+	list, err := client.client.GetList(listID, trello.Defaults())
+	if err != nil {
+		return nil, err
+	}
+
+	cards, err := list.GetCards(trello.Defaults())
+	if err != nil {
+		return nil, err
+	}
+
+	t := []string{}
+	for _, c := range cards {
+		t = append(t, c.Name)
+	}
+	return t, nil
+}
+
+func getTrelloClient() trelloClientAdapter {
 	if client == nil {
 		appKey := os.Getenv("TRELLO_KEY")
 		token := os.Getenv("TRELLO_TOKEN")
 
-		client = trello.NewClient(appKey, token)
+		client = trelloClient{client: trello.NewClient(appKey, token)}
 	}
 	return client
 }
