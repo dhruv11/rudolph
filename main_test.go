@@ -17,6 +17,41 @@ func TestGetHelpText(t *testing.T) {
 type testTrelloClient struct {
 	unhappyPath      bool
 	expectedCardName string
+	expectedListID   string
+}
+
+func (client testTrelloClient) GetCardTitles(listID string) ([]string, error) {
+	if client.unhappyPath {
+		return nil, errors.New("unhappy")
+	}
+
+	if listID != client.expectedListID {
+		return nil, errors.New("list id is incorrect")
+	}
+
+	cards := []string{"card1", "card2"}
+	return cards, nil
+}
+
+func TestGetListItems(t *testing.T) {
+	expected := "card1\ncard2\n"
+
+	actual, err := getListItems("123", testTrelloClient{expectedListID: "123"})
+
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	if actual != expected {
+		t.Errorf("list items are incorrect, got: %s, want: %s.", actual, expected)
+	}
+}
+
+func TestGetListItemsUnhappy(t *testing.T) {
+	_, err := getListItems("123", testTrelloClient{unhappyPath: true})
+
+	if err == nil {
+		t.Errorf("expected an error")
+	}
 }
 
 func (client testTrelloClient) CreateCard(title string, listID string) error {
@@ -28,11 +63,6 @@ func (client testTrelloClient) CreateCard(title string, listID string) error {
 		return errors.New("card name is incorrect")
 	}
 	return nil
-}
-
-// TODO: mock out and write unit tests for getListItems
-func (client testTrelloClient) GetCardTitles(listID string) ([]string, error) {
-	return nil, nil
 }
 
 func TestAddIdea(t *testing.T) {
