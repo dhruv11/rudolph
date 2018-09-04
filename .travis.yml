@@ -25,5 +25,5 @@ script:
   - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && echo "$password" | docker login -u "$username" --password-stdin || [ ${TRAVIS_PULL_REQUEST} != "false" ]'
   - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && docker push dhruvdhir/rudolph:latest || [ ${TRAVIS_PULL_REQUEST} != "false" ]'
   - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && docker push dhruvdhir/rudolph:1.0.$TRAVIS_BUILD_NUMBER || [ ${TRAVIS_PULL_REQUEST} != "false" ]'
-  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && $GOPATH/bin/goveralls -service=travis-ci || [ ${TRAVIS_PULL_REQUEST} != "false" ]'
+  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && $HOME/gopath/bin/goveralls -service=travis-ci || [ ${TRAVIS_PULL_REQUEST} != "false" ]'
   
