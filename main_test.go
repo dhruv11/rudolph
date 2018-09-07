@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"errors"
+	"io/ioutil"
+	"net/http"
 	"testing"
 )
 
@@ -86,6 +89,55 @@ func TestAddIdeaUnhappy(t *testing.T) {
 	}
 }
 
+type RoundTripFunc func(req *http.Request) (*http.Response, error)
+
+func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req)
+}
+
+func TestGetDadJoke(t *testing.T) {
+	expected := "haha"
+
+	f := func(req *http.Request) (*http.Response, error) {
+		if req.URL.String() == "https://icanhazdadjoke.com/" && req.Header.Get("Accept") == "text/plain" {
+			return &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(bytes.NewBufferString(`haha`)),
+			}, nil
+		}
+		return nil, errors.New("unexpected request")
+	}
+
+	client := &http.Client{
+		Transport: RoundTripFunc(f),
+	}
+
+	actual, err := getDadJoke(client)
+
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	if actual != expected {
+		t.Errorf("joke is incorrect, got: %s, want: %s.", actual, expected)
+	}
+}
+
+func TestGetDadJokeUnhappy(t *testing.T) {
+	f := func(req *http.Request) (*http.Response, error) {
+		return nil, errors.New("unhappy path")
+	}
+
+	client := &http.Client{
+		Transport: RoundTripFunc(f),
+	}
+
+	_, err := getDadJoke(client)
+
+	if err == nil {
+		t.Errorf("expected an error")
+	}
+}
+
 func getHelpStub() string {
 	return "helpText"
 }
@@ -116,7 +168,7 @@ func TestExecuteGetHelpDefault(t *testing.T) {
 	}
 }
 
-func getDadJokeStub() (string, error) {
+func getDadJokeStub(client *http.Client) (string, error) {
 	return "joke", nil
 }
 

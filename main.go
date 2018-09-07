@@ -78,7 +78,7 @@ func execute(text string, prefix string, getListItems listGetter,
 	} else if strings.HasPrefix(text, "add") {
 		return addIdea(text, getTrelloClient())
 	} else if text == "make me laugh" {
-		return getDadJoke()
+		return getDadJoke(&http.Client{})
 	}
 	return getHelp(), nil
 }
@@ -122,11 +122,9 @@ func getHelp() string {
 	return helpText
 }
 
-type jokeGetter func() (string, error)
+type jokeGetter func(client *http.Client) (string, error)
 
-func getDadJoke() (string, error) {
-	client := &http.Client{}
-
+func getDadJoke(client *http.Client) (string, error) {
 	req, err := http.NewRequest("GET", "https://icanhazdadjoke.com/", nil)
 	if err != nil {
 		return "", err
