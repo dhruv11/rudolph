@@ -54,12 +54,23 @@ Loop:
 			case *slack.RTMError:
 				fmt.Printf("Error: %s\n", ev.Error())
 
+			case *slack.LatencyReport:
+				// send hourly updates to me, todo: only during trading hours
+				// if time.Now().Minute() == 0 && time.Now().Second() < 30 {
+				// 	r, err := getSharePrice(&http.Client{}, "atm")
+				// 	if err != nil {
+				// 		fmt.Printf("Error: %s\n", err)
+				// 	} else {
+				// 		rtm.SendMessage(rtm.NewOutgoingMessage(r, "DCKGBPU10"))
+				// 	}
+				// }
+
 			case *slack.InvalidAuthEvent:
 				fmt.Printf("Invalid credentials")
 				break Loop
 
 			default:
-				//do nothing
+				// do nothing
 			}
 		}
 	}
@@ -77,6 +88,8 @@ func execute(text string, prefix string, getListItems listGetter,
 		return getListItems(ideasListID, getTrelloClient())
 	} else if strings.HasPrefix(text, "add") {
 		return addIdea(text, getTrelloClient())
+	} else if strings.HasPrefix(text, "price") {
+		return getSharePrice(&http.Client{}, text)
 	} else if text == "make me laugh" {
 		return getDadJoke(&http.Client{})
 	}
@@ -142,6 +155,33 @@ func getDadJoke(client *http.Client) (string, error) {
 		return "", errors.Wrap(err, fmt.Sprintf("Could not read request for %s", req.URL))
 	}
 	return string(data), nil
+}
+
+func getSharePrice(client *http.Client, symbol string) (string, error) {
+	symbol = strings.TrimPrefix(symbol, "price")
+	symbol = strings.TrimSpace(symbol)
+
+	req, err := http.NewRequest("GET", "https://www.google.co.nz/search?q="+symbol+"+nzx", nil)
+	if err != nil {
+		return "", err
+	}
+
+	response, err := client.Do(req)
+	if err != nil {
+		return "", errors.Wrap(err, fmt.Sprintf("Could not make request for %s", req.URL))
+	}
+
+	data, err := ioutil.ReadAll(response.Body)
+	defer response.Body.Close()
+	if err != nil {
+		return "", errors.Wrap(err, fmt.Sprintf("Could not read request for %s", req.URL))
+	}
+
+	d := string(data)
+	s := strings.Index(d, "<span style=\"font-size:157%\"><b>")
+	f := strings.Index(d[s+32:], "</b>")
+
+	return symbol + ": $" + d[s+32:s+32+f], nil
 }
 
 type trelloClientAdapter interface {
