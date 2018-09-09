@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/adlio/trello"
 	"github.com/nlopes/slack"
@@ -47,6 +49,7 @@ Loop:
 					if err != nil {
 						fmt.Printf("Error: %s\n", err)
 					} else {
+						fmt.Println("Channel is: ", ev.Channel)
 						rtm.SendMessage(rtm.NewOutgoingMessage(response, ev.Channel))
 					}
 				}
@@ -55,15 +58,15 @@ Loop:
 				fmt.Printf("Error: %s\n", ev.Error())
 
 			case *slack.LatencyReport:
-				// send hourly updates to me, todo: only during trading hours
-				// if time.Now().Minute() == 0 && time.Now().Second() < 30 {
-				// 	r, err := getSharePrice(&http.Client{}, "atm")
-				// 	if err != nil {
-				// 		fmt.Printf("Error: %s\n", err)
-				// 	} else {
-				// 		rtm.SendMessage(rtm.NewOutgoingMessage(r, "DCKGBPU10"))
-				// 	}
-				// }
+				// send scheduled updates to me
+				if shouldSendUpdate() {
+					r, err := getScheduledUpdate()
+					if err != nil {
+						fmt.Printf("Error: %s\n", err)
+					} else {
+						rtm.SendMessage(rtm.NewOutgoingMessage(r, "DCKGBPU10"))
+					}
+				}
 
 			case *slack.InvalidAuthEvent:
 				fmt.Printf("Invalid credentials")
@@ -157,11 +160,27 @@ func getDadJoke(client *http.Client) (string, error) {
 	return string(data), nil
 }
 
+func getScheduledUpdate() (string, error) {
+	shares := []string{"atm nzx", "xro asx"}
+
+	var response strings.Builder
+	for _, s := range shares {
+		r, err := getSharePrice(&http.Client{}, s)
+		if err != nil {
+			continue
+		}
+		response.WriteString(r)
+		response.WriteString("\n")
+	}
+
+	return response.String(), nil
+}
+
 func getSharePrice(client *http.Client, symbol string) (string, error) {
 	symbol = strings.TrimPrefix(symbol, "price")
 	symbol = strings.TrimSpace(symbol)
 
-	req, err := http.NewRequest("GET", "https://www.google.co.nz/search?q="+symbol+"+nzx", nil)
+	req, err := http.NewRequest("GET", "https://www.google.co.nz/search?q="+url.QueryEscape(symbol), nil)
 	if err != nil {
 		return "", err
 	}
@@ -182,6 +201,32 @@ func getSharePrice(client *http.Client, symbol string) (string, error) {
 	f := strings.Index(d[s+32:], "</b>")
 
 	return symbol + ": $" + d[s+32:s+32+f], nil
+}
+
+func shouldSendUpdate() bool {
+	loc, err := time.LoadLocation("Pacific/Auckland")
+	if err != nil {
+		fmt.Println("Could not find timezone")
+		return false
+	}
+	now := time.Now().In(loc)
+
+	h := []int{10, 12, 14, 16}
+	if now.Weekday() > 0 && now.Weekday() < 6 && contains(h, now.Hour()) &&
+		time.Now().Minute() == 30 && time.Now().Second() < 30 {
+		return true
+	}
+
+	return false
+}
+
+func contains(arr []int, h int) bool {
+	for _, a := range arr {
+		if a == h {
+			return true
+		}
+	}
+	return false
 }
 
 type trelloClientAdapter interface {
