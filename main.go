@@ -49,7 +49,6 @@ Loop:
 					if err != nil {
 						fmt.Printf("Error: %s\n", err)
 					} else {
-						fmt.Println("Channel is: ", ev.Channel)
 						rtm.SendMessage(rtm.NewOutgoingMessage(response, ev.Channel))
 					}
 				}
@@ -216,7 +215,6 @@ func shouldSendUpdate() bool {
 		time.Now().Minute() == 30 && time.Now().Second() < 30 {
 		return true
 	}
-
 	return false
 }
 
