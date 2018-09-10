@@ -203,16 +203,16 @@ func getSharePrice(client *http.Client, symbol string) (string, error) {
 }
 
 func shouldSendUpdate() bool {
-	loc, err := time.LoadLocation("Pacific/Auckland")
+	loc, err := time.LoadLocation("UTC")
 	if err != nil {
 		fmt.Println("Could not find timezone")
 		return false
 	}
 	now := time.Now().In(loc)
 
-	h := []int{10, 12, 14, 16}
-	if now.Weekday() > 0 && now.Weekday() < 6 && contains(h, now.Hour()) &&
-		time.Now().Minute() == 30 && time.Now().Second() < 30 {
+	h := []int{22, 0, 2, 4}
+	if now.Weekday() < 5 && contains(h, now.Hour()) &&
+		now.Minute() == 30 && now.Second() < 30 {
 		return true
 	}
 	return false
