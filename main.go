@@ -85,11 +85,11 @@ func execute(text string, prefix string, getListItems listGetter,
 	text = strings.ToLower(text)
 
 	if strings.HasSuffix(text, "scheduled") {
-		return getListItems(scheduledListID, getTrelloClient())
+		return getListItems(scheduledListID, newTrelloClientAdapter())
 	} else if strings.HasSuffix(text, "ideas") {
-		return getListItems(ideasListID, getTrelloClient())
+		return getListItems(ideasListID, newTrelloClientAdapter())
 	} else if strings.HasPrefix(text, "add") {
-		return addIdea(text, getTrelloClient())
+		return addIdea(text, newTrelloClientAdapter())
 	} else if strings.HasPrefix(text, "price") {
 		return getSharePrice(&http.Client{}, text)
 	} else if text == "make me laugh" {
@@ -232,6 +232,16 @@ type trelloClientAdapter interface {
 	GetCardTitles(listID string) ([]string, error)
 }
 
+func newTrelloClientAdapter() trelloClientAdapter {
+	if client == nil {
+		appKey := os.Getenv("TRELLO_KEY")
+		token := os.Getenv("TRELLO_TOKEN")
+
+		client = trelloClient{client: trello.NewClient(appKey, token)}
+	}
+	return client
+}
+
 type trelloClient struct {
 	client *trello.Client
 }
@@ -260,14 +270,4 @@ func (client trelloClient) GetCardTitles(listID string) ([]string, error) {
 		t = append(t, c.Name)
 	}
 	return t, nil
-}
-
-func getTrelloClient() trelloClientAdapter {
-	if client == nil {
-		appKey := os.Getenv("TRELLO_KEY")
-		token := os.Getenv("TRELLO_TOKEN")
-
-		client = trelloClient{client: trello.NewClient(appKey, token)}
-	}
-	return client
 }
