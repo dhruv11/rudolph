@@ -94,6 +94,8 @@ func execute(text string, prefix string, getListItems listGetter,
 		return getSharePrice(&http.Client{}, text)
 	} else if text == "make me laugh" {
 		return getDadJoke(&http.Client{})
+	} else if text == "help" {
+		return getHelp()
 	}
 	
 	contributeText := "Sorry bro, I don't know how to do that yet, why don't you contribute to my code base? \nhttps://github.com/dhruv11/rudolph\n"
