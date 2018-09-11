@@ -95,7 +95,10 @@ func execute(text string, prefix string, getListItems listGetter,
 	} else if text == "make me laugh" {
 		return getDadJoke(&http.Client{})
 	}
-	return getHelp(), nil
+	
+	contributeText := "Sorry bro, I don't know how to do that yet, why don't you contribute to my code base? \nhttps://github.com/dhruv11/rudolph\n";
+	
+	return contributeText + getHelp(), nil
 }
 
 type listGetter func(listID string, client trelloClientAdapter) (string, error)
