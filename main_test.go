@@ -1,10 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"errors"
-	"io/ioutil"
-	"net/http"
 	"testing"
 )
 
@@ -17,6 +13,7 @@ func TestGetHelpText(t *testing.T) {
 	}
 }
 
+/*
 type testTrelloClient struct {
 	unhappyPath      bool
 	expectedCardName string
@@ -218,3 +215,5 @@ func TestExecuteAddIdea(t *testing.T) {
 		t.Errorf("add idea response is incorrect, got: %s, want: %s.", actual, expected)
 	}
 }
+
+*/
