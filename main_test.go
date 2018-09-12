@@ -162,7 +162,7 @@ func TestExecuteGetHelp(t *testing.T) {
 func TestExecuteGetHelpDefault(t *testing.T) {
 	expected := "contributeText"
 
-	actual, err := execute("rudolph blah", "rudolph", nil, nil, getContributeStub, nil)
+	actual, err := execute("rudolph blah", "rudolph", nil, nil, nil, nil, getContributeStub)
 
 	if err != nil {
 		t.Errorf(err.Error())
