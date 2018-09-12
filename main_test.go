@@ -142,10 +142,14 @@ func getHelpStub() string {
 	return "helpText"
 }
 
+func getContributeStub() string {
+	return "contributeText"
+}
+
 func TestExecuteGetHelp(t *testing.T) {
 	expected := "helpText"
 
-	actual, err := execute("rudolph HELP", "rudolph", nil, nil, getHelpStub, nil)
+	actual, err := execute("rudolph HELP", "rudolph", nil, nil, getHelpStub, nil, nil)
 
 	if err != nil {
 		t.Errorf(err.Error())
@@ -156,15 +160,15 @@ func TestExecuteGetHelp(t *testing.T) {
 }
 
 func TestExecuteGetHelpDefault(t *testing.T) {
-	expected := "helpText"
+	expected := "contributeText"
 
-	actual, err := execute("rudolph blah", "rudolph", nil, nil, getHelpStub, nil)
+	actual, err := execute("rudolph blah", "rudolph", nil, nil, nil, nil, getContributeStub)
 
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 	if actual != expected {
-		t.Errorf("help text is incorrect, got: %s, want: %s.", actual, expected)
+		t.Errorf("contribute text is incorrect, got: %s, want: %s.", actual, expected)
 	}
 }
 
@@ -175,7 +179,7 @@ func getDadJokeStub(client *http.Client) (string, error) {
 func TestExecuteGetJoke(t *testing.T) {
 	expected := "joke"
 
-	actual, err := execute("rudolph make me laugh", "rudolph", nil, nil, nil, getDadJokeStub)
+	actual, err := execute("rudolph make me laugh", "rudolph", nil, nil, nil, getDadJokeStub, nil)
 
 	if err != nil {
 		t.Errorf(err.Error())
@@ -192,7 +196,7 @@ func getListItemsStub(listID string, client trelloClientAdapter) (string, error)
 func TestExecuteGetList(t *testing.T) {
 	expected := "card1\ncard2"
 
-	actual, err := execute("rudolph ideas", "rudolph", getListItemsStub, nil, nil, nil)
+	actual, err := execute("rudolph ideas", "rudolph", getListItemsStub, nil, nil, nil, nil)
 
 	if err != nil {
 		t.Errorf(err.Error())
@@ -209,7 +213,7 @@ func addIdeaStub(title string, client trelloClientAdapter) (string, error) {
 func TestExecuteAddIdea(t *testing.T) {
 	expected := "done"
 
-	actual, err := execute("rudolph add blah", "rudolph", nil, addIdeaStub, nil, nil)
+	actual, err := execute("rudolph add blah", "rudolph", nil, addIdeaStub, nil, nil, nil)
 
 	if err != nil {
 		t.Errorf(err.Error())

@@ -45,7 +45,7 @@ Loop:
 				prefix := fmt.Sprintf("<@%s> ", info.User.ID)
 
 				if ev.User != info.User.ID && strings.HasPrefix(ev.Text, prefix) {
-					response, err := execute(ev.Text, prefix, getListItems, addIdea, getHelp, getDadJoke)
+					response, err := execute(ev.Text, prefix, getListItems, addIdea, getHelp, getDadJoke, getContribute)
 					if err != nil {
 						fmt.Printf("Error: %s\n", err)
 					} else {
@@ -79,7 +79,7 @@ Loop:
 }
 
 func execute(text string, prefix string, getListItems listGetter,
-	addIdea cardCreator, getHelp helpGetter, getDadJoke jokeGetter) (string, error) {
+	addIdea cardCreator, getHelp helpGetter, getDadJoke jokeGetter, getContribute contributeGetter) (string, error) {
 	text = strings.TrimPrefix(text, prefix)
 	text = strings.TrimSpace(text)
 	text = strings.ToLower(text)
@@ -94,8 +94,19 @@ func execute(text string, prefix string, getListItems listGetter,
 		return getSharePrice(&http.Client{}, text)
 	} else if text == "make me laugh" {
 		return getDadJoke(&http.Client{})
+	} else if text == "help" {
+		return getHelp(), nil
 	}
-	return getHelp(), nil
+	
+	return getContribute(), nil
+}
+
+type contributeGetter func() string
+
+func getContribute() string {
+	contributeText := "Sorry bro, I don't know how to do that yet, why don't you contribute to my code base? \nhttps://github.com/dhruv11/rudolph\n"
+	
+	return contributeText + getHelp()
 }
 
 type listGetter func(listID string, client trelloClientAdapter) (string, error)
