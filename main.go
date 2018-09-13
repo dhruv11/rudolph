@@ -111,8 +111,10 @@ func (s *server) processMessage(msg *slack.MessageEvent, info *slack.Info, prefi
 		return getSharePrice(text)
 	} else if text == "make me laugh" {
 		return getDadJoke()
+	} else if text == "help" {
+		return getHelp(), nil
 	}
-	return getHelp(), nil
+	return getContribute(), nil
 }
 
 func (s *server) getListItems(listID string) (string, error) {
@@ -145,6 +147,11 @@ func (s *server) addIdea(title string) (string, error) {
 func getHelp() string {
 	helpText := "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help \n Feature request - @dhruv <request>"
 	return helpText
+}
+
+func getContribute() string {
+	contributeText := "Sorry buddy, I don't know how to do that yet, why don't you contribute to my code base? \nhttps://github.com/dhruv11/rudolph\n"
+	return contributeText + getHelp()
 }
 
 func shouldSendUpdate() bool {
