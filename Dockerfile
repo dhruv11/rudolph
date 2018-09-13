@@ -4,6 +4,6 @@ RUN apk add --no-cache ca-certificates
 
 WORKDIR /app
 
-ADD main /app/
+ADD rudolph /app/
 
-ENTRYPOINT ["./main"]
+ENTRYPOINT ["./rudolph"]
