@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -8,16 +9,21 @@ import (
 )
 
 func getDadJoke() (string, error) {
-	u := "https://icanhazdadjoke.com/"
-	resp, err := http.Get(u)
+	req, err := http.NewRequest("GET", "https://icanhazdadjoke.com/", nil)
 	if err != nil {
-		return "", errors.Wrapf(err, "Could not make request to %s", u)
+		return "", err
+	}
+	req.Header.Add("Accept", "text/plain")
+
+	resp, err := (&http.Client{}).Do(req)
+	if err != nil {
+		return "", errors.Wrap(err, fmt.Sprintf("Could not make request for %s", req.URL))
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
-		return "", errors.Wrapf(err, "Could not read request for %s", u)
+		return "", errors.Wrapf(err, "Could not read request for %s", req.URL)
 	}
 	return string(data), nil
 }
