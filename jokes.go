@@ -8,14 +8,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-func getDadJoke() (string, error) {
+func getDadJoke(client *http.Client) (string, error) {
 	req, err := http.NewRequest("GET", "https://icanhazdadjoke.com/", nil)
 	if err != nil {
 		return "", err
 	}
 	req.Header.Add("Accept", "text/plain")
 
-	resp, err := (&http.Client{}).Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", errors.Wrap(err, fmt.Sprintf("Could not make request for %s", req.URL))
 	}

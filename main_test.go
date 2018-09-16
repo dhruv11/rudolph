@@ -1,15 +1,77 @@
 package main
 
 import (
+	"bytes"
+	"errors"
+	"io/ioutil"
+	"net/http"
 	"testing"
 )
 
-func TestGetHelpText(t *testing.T) {
-	expected := "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help \n Feature request - @dhruv <request>"
+func TestGetHelp(t *testing.T) {
+	expected := "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help"
 
 	actual := getHelp()
 	if actual != expected {
 		t.Errorf("Help text was incorrect, got: %s, want: %s.", actual, expected)
+	}
+}
+
+func TestGetContribute(t *testing.T) {
+	expected := "Sorry buddy, I don't know how to do that yet, why don't you contribute to my code base? \nhttps://github.com/dhruv11/rudolph\nI can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help"
+
+	actual := getContribute()
+	if actual != expected {
+		t.Errorf("Contribute text was incorrect, got: %s, want: %s.", actual, expected)
+	}
+}
+
+type RoundTripFunc func(req *http.Request) (*http.Response, error)
+
+func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req)
+}
+
+func TestGetDadJoke(t *testing.T) {
+	expected := "haha"
+
+	f := func(req *http.Request) (*http.Response, error) {
+		if req.URL.String() == "https://icanhazdadjoke.com/" && req.Header.Get("Accept") == "text/plain" {
+			return &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(bytes.NewBufferString(`haha`)),
+			}, nil
+		}
+		return nil, errors.New("unexpected request")
+	}
+
+	client := &http.Client{
+		Transport: RoundTripFunc(f),
+	}
+
+	actual, err := getDadJoke(client)
+
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	if actual != expected {
+		t.Errorf("joke is incorrect, got: %s, want: %s.", actual, expected)
+	}
+}
+
+func TestGetDadJokeUnhappy(t *testing.T) {
+	f := func(req *http.Request) (*http.Response, error) {
+		return nil, errors.New("unhappy path")
+	}
+
+	client := &http.Client{
+		Transport: RoundTripFunc(f),
+	}
+
+	_, err := getDadJoke(client)
+
+	if err == nil {
+		t.Errorf("expected an error")
 	}
 }
 
@@ -80,55 +142,6 @@ func TestAddIdea(t *testing.T) {
 
 func TestAddIdeaUnhappy(t *testing.T) {
 	_, err := addIdea("add testing", testTrelloClient{unhappyPath: true})
-
-	if err == nil {
-		t.Errorf("expected an error")
-	}
-}
-
-type RoundTripFunc func(req *http.Request) (*http.Response, error)
-
-func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
-	return f(req)
-}
-
-func TestGetDadJoke(t *testing.T) {
-	expected := "haha"
-
-	f := func(req *http.Request) (*http.Response, error) {
-		if req.URL.String() == "https://icanhazdadjoke.com/" && req.Header.Get("Accept") == "text/plain" {
-			return &http.Response{
-				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewBufferString(`haha`)),
-			}, nil
-		}
-		return nil, errors.New("unexpected request")
-	}
-
-	client := &http.Client{
-		Transport: RoundTripFunc(f),
-	}
-
-	actual, err := getDadJoke(client)
-
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	if actual != expected {
-		t.Errorf("joke is incorrect, got: %s, want: %s.", actual, expected)
-	}
-}
-
-func TestGetDadJokeUnhappy(t *testing.T) {
-	f := func(req *http.Request) (*http.Response, error) {
-		return nil, errors.New("unhappy path")
-	}
-
-	client := &http.Client{
-		Transport: RoundTripFunc(f),
-	}
-
-	_, err := getDadJoke(client)
 
 	if err == nil {
 		t.Errorf("expected an error")

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -110,7 +111,7 @@ func (s *server) processMessage(msg *slack.MessageEvent, info *slack.Info, prefi
 	} else if strings.HasPrefix(text, "price") {
 		return getSharePrice(text)
 	} else if text == "make me laugh" {
-		return getDadJoke()
+		return getDadJoke(&http.Client{})
 	} else if text == "help" {
 		return getHelp(), nil
 	}
@@ -145,7 +146,7 @@ func (s *server) addIdea(title string) (string, error) {
 }
 
 func getHelp() string {
-	helpText := "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help \n Feature request - @dhruv <request>"
+	helpText := "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help"
 	return helpText
 }
 
