@@ -2,7 +2,7 @@ package main
 
 import "github.com/nlopes/slack"
 
-// For mocking slack client
+// SlackRTMInterface - for mocking slack client
 type SlackRTMInterface interface {
 	GetInfo() *slack.Info
 	NewOutgoingMessage(text string, channelID string, options ...slack.RTMsgOption) *slack.OutgoingMessage

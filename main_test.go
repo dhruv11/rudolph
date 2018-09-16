@@ -6,6 +6,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetHelp(t *testing.T) {
@@ -127,6 +130,39 @@ func TestGetScheduledUpdate(t *testing.T) {
 	}
 	if actual != expected {
 		t.Errorf("scheduled update is incorrect, got: %s, want: %s.", actual, expected)
+	}
+}
+
+type mockClock struct {
+	t time.Time
+}
+
+func (c mockClock) Now() time.Time                                { return c.t }
+func (c mockClock) LoadLocation(l string) (*time.Location, error) { return time.LoadLocation(l) }
+
+func TestShouldSendUpdate(t *testing.T) {
+	tests := map[string]struct {
+		input  time.Time
+		output bool
+	}{
+		"weekday - trading hours": {
+			input:  time.Date(2018, 9, 17, 0, 30, 0, 0, time.UTC),
+			output: true,
+		},
+		"weekday - after trading hours": {
+			input:  time.Date(2018, 9, 17, 14, 30, 0, 0, time.UTC),
+			output: false,
+		},
+		"weekend": {
+			input:  time.Date(2018, 9, 15, 0, 30, 0, 0, time.UTC),
+			output: false,
+		},
+	}
+
+	for testName, test := range tests {
+		t.Logf("Running test case %s", testName)
+		output := shouldSendUpdate(mockClock{t: test.input})
+		assert.Equal(t, test.output, output)
 	}
 }
 

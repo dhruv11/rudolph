@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -47,4 +48,39 @@ func getSharePrice(client *http.Client, symbol string) (string, error) {
 	f := strings.Index(d[span+32:], "</b>")
 
 	return symbol + ": $" + d[span+32:span+32+f], nil
+}
+
+type clock interface {
+	Now() time.Time
+	LoadLocation(l string) (*time.Location, error)
+}
+
+type realClock struct{}
+
+func (realClock) Now() time.Time                                { return time.Now() }
+func (realClock) LoadLocation(l string) (*time.Location, error) { return time.LoadLocation(l) }
+
+func shouldSendUpdate(clock clock) bool {
+	loc, err := clock.LoadLocation("UTC")
+	if err != nil {
+		fmt.Println("Could not find timezone")
+		return false
+	}
+	now := clock.Now().In(loc)
+
+	h := []int{22, 0, 2, 4}
+	if now.Weekday() < 5 && contains(h, now.Hour()) &&
+		now.Minute() == 30 && now.Second() < 30 {
+		return true
+	}
+	return false
+}
+
+func contains(arr []int, h int) bool {
+	for _, a := range arr {
+		if a == h {
+			return true
+		}
+	}
+	return false
 }

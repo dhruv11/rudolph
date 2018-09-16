@@ -4,7 +4,7 @@ import (
 	"github.com/adlio/trello"
 )
 
-// For mocking trello client
+// TrelloClient - for mocking trello client
 type TrelloClient interface {
 	CreateCard(card *trello.Card, extraArgs trello.Arguments) error
 	GetList(listID string, args trello.Arguments) (list *trello.List, err error)
