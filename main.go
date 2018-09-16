@@ -74,7 +74,7 @@ func (s *server) start() {
 				case *slack.LatencyReport:
 					// send scheduled updates to me
 					if shouldSendUpdate() {
-						r, err := getScheduledUpdate()
+						r, err := getScheduledUpdate(&http.Client{})
 						if err != nil {
 							fmt.Printf("Error: %s\n", err)
 						} else {
@@ -109,7 +109,7 @@ func (s *server) processMessage(msg *slack.MessageEvent, info *slack.Info, prefi
 	} else if strings.HasPrefix(text, "add") {
 		return s.addIdea(text)
 	} else if strings.HasPrefix(text, "price") {
-		return getSharePrice(text)
+		return getSharePrice(&http.Client{}, text)
 	} else if text == "make me laugh" {
 		return getDadJoke(&http.Client{})
 	} else if text == "help" {

@@ -10,12 +10,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-func getScheduledUpdate() (string, error) {
+func getScheduledUpdate(client *http.Client) (string, error) {
 	shares := []string{"atm nzx", "xro asx"}
 
 	var res strings.Builder
 	for _, share := range shares {
-		r, err := getSharePrice(share)
+		r, err := getSharePrice(client, share)
 		if err != nil {
 			continue
 		}
@@ -26,12 +26,12 @@ func getScheduledUpdate() (string, error) {
 	return res.String(), nil
 }
 
-func getSharePrice(symbol string) (string, error) {
+func getSharePrice(client *http.Client, symbol string) (string, error) {
 	symbol = strings.TrimPrefix(symbol, "price")
 	symbol = strings.TrimSpace(symbol)
 
 	u := fmt.Sprintf("https://www.google.co.nz/search?q=%s", url.QueryEscape(symbol))
-	resp, err := http.Get(u)
+	resp, err := client.Get(u)
 	if err != nil {
 		return "", errors.Wrapf(err, "Could not make request to %s", u)
 	}

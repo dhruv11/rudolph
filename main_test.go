@@ -75,6 +75,61 @@ func TestGetDadJokeUnhappy(t *testing.T) {
 	}
 }
 
+func TestGetSharePrice(t *testing.T) {
+	expected := "atm nzx: $11.99"
+
+	f := func(req *http.Request) (*http.Response, error) {
+		if req.URL.String() == "https://www.google.co.nz/search?q=atm+nzx" {
+			return &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(bytes.NewBufferString(`<span style="font-size:157%"><b>11.99</b>`)),
+			}, nil
+		}
+		return nil, errors.New("unexpected request")
+	}
+
+	client := &http.Client{
+		Transport: RoundTripFunc(f),
+	}
+
+	actual, err := getSharePrice(client, "atm nzx")
+
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	if actual != expected {
+		t.Errorf("share price is incorrect, got: %s, want: %s.", actual, expected)
+	}
+}
+
+func TestGetScheduledUpdate(t *testing.T) {
+	expected := "atm nzx: $11.99\nxro asx: $11.99\n"
+
+	f := func(req *http.Request) (*http.Response, error) {
+		if req.URL.String() == "https://www.google.co.nz/search?q=atm+nzx" ||
+			req.URL.String() == "https://www.google.co.nz/search?q=xro+asx" {
+			return &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(bytes.NewBufferString(`<span style="font-size:157%"><b>11.99</b>`)),
+			}, nil
+		}
+		return nil, errors.New("unexpected request")
+	}
+
+	client := &http.Client{
+		Transport: RoundTripFunc(f),
+	}
+
+	actual, err := getScheduledUpdate(client)
+
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	if actual != expected {
+		t.Errorf("scheduled update is incorrect, got: %s, want: %s.", actual, expected)
+	}
+}
+
 /*
 type testTrelloClient struct {
 	unhappyPath      bool
