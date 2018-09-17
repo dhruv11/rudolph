@@ -42,6 +42,29 @@ func (_m *SlackRTMInterface) GetInfo() *slack.Info {
 	return r0
 }
 
+// GetUserInfo provides a mock function with given fields: user
+func (_m *SlackRTMInterface) GetUserInfo(user string) (*slack.User, error) {
+	ret := _m.Called(user)
+
+	var r0 *slack.User
+	if rf, ok := ret.Get(0).(func(string) *slack.User); ok {
+		r0 = rf(user)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*slack.User)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewOutgoingMessage provides a mock function with given fields: text, channelID, options
 func (_m *SlackRTMInterface) NewOutgoingMessage(text string, channelID string, options ...slack.RTMsgOption) *slack.OutgoingMessage {
 	_va := make([]interface{}, len(options))
@@ -63,6 +86,41 @@ func (_m *SlackRTMInterface) NewOutgoingMessage(text string, channelID string, o
 	}
 
 	return r0
+}
+
+// OpenIMChannel provides a mock function with given fields: user
+func (_m *SlackRTMInterface) OpenIMChannel(user string) (bool, bool, string, error) {
+	ret := _m.Called(user)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(string) bool); ok {
+		r0 = rf(user)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 bool
+	if rf, ok := ret.Get(1).(func(string) bool); ok {
+		r1 = rf(user)
+	} else {
+		r1 = ret.Get(1).(bool)
+	}
+
+	var r2 string
+	if rf, ok := ret.Get(2).(func(string) string); ok {
+		r2 = rf(user)
+	} else {
+		r2 = ret.Get(2).(string)
+	}
+
+	var r3 error
+	if rf, ok := ret.Get(3).(func(string) error); ok {
+		r3 = rf(user)
+	} else {
+		r3 = ret.Error(3)
+	}
+
+	return r0, r1, r2, r3
 }
 
 // SendMessage provides a mock function with given fields: msg
