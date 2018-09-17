@@ -59,7 +59,8 @@ func (s *server) start() {
 				case *slack.MessageEvent:
 					info := s.slack.GetInfo()
 					prefix := fmt.Sprintf("<@%s> ", info.User.ID)
-					resp, err := s.processMessage(msg, info, prefix)
+
+					resp, err := s.processMessage(msg, info, prefix, s.slack)
 					if err != nil {
 						fmt.Printf("Error: %s\n", err)
 					}
@@ -97,7 +98,7 @@ func (s *server) stop() {
 	close(s.done)
 }
 
-func (s *server) processMessage(msg *slack.MessageEvent, info *slack.Info, prefix string) (string, error) {
+func (s *server) processMessage(msg *slack.MessageEvent, info *slack.Info, prefix string, slack SlackRTMInterface) (string, error) {
 	text := strings.TrimPrefix(msg.Text, prefix)
 	text = strings.TrimSpace(text)
 	text = strings.ToLower(text)
@@ -113,6 +114,8 @@ func (s *server) processMessage(msg *slack.MessageEvent, info *slack.Info, prefi
 		return getDadJoke(&http.Client{})
 	} else if text == "help" {
 		return getHelp(), nil
+	} else if strings.HasPrefix(text, "wake up") {
+		return wakeUp(text, slack)
 	}
 	return getContribute(), nil
 }

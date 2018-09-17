@@ -1,5 +1,11 @@
 package main
 
+import (
+	"strings"
+
+	"github.com/pkg/errors"
+)
+
 func getHelp() string {
 	helpText := "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help"
 	return helpText
@@ -8,4 +14,22 @@ func getHelp() string {
 func getContribute() string {
 	contributeText := "Sorry buddy, I don't know how to do that yet, why don't you contribute to my code base? \nhttps://github.com/dhruv11/rudolph\n"
 	return contributeText + getHelp()
+}
+
+func wakeUp(user string, slack SlackRTMInterface) (string, error) {
+	user = strings.TrimPrefix(user, "wake up <@")
+	user = strings.TrimSuffix(user, ">")
+	user = strings.ToUpper(user)
+
+	_, _, c, err := slack.OpenIMChannel(user)
+	if err != nil {
+		return "", errors.Wrapf(err, "Could not oepn an IM channel to: %s", user)
+	}
+	slack.SendMessage(slack.NewOutgoingMessage("buddy stop napping at work, people are looking for you...", c))
+
+	u, err := slack.GetUserInfo(user)
+	if err != nil {
+		return "I've just pinged them for you :)", nil
+	}
+	return "I've just pinged " + u.RealName + " for you :)", nil
 }
