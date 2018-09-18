@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -14,6 +15,7 @@ import (
 const (
 	ideasListID     = "5b613db79ea6a782ac173a48"
 	scheduledListID = "5b613dbfd923da512f85263b"
+	meetupsListId   = "5b6140b0ff2ec75df864657f"
 )
 
 func main() {
@@ -64,7 +66,8 @@ func (s *server) start() {
 					if err != nil {
 						fmt.Printf("Error: %s\n", err)
 					}
-					if msg.User != info.User.ID && strings.HasPrefix(msg.Text, prefix) {
+					// TODO: Move the prefix check to processMessage
+					if msg.User != info.User.ID && (strings.HasPrefix(msg.Text, prefix) || strings.HasPrefix(msg.Text, "<https://www.meetup.com/")) {
 						s.slack.SendMessage(s.slack.NewOutgoingMessage(resp, msg.Channel))
 					}
 
@@ -102,6 +105,7 @@ func (s *server) processMessage(msg *slack.MessageEvent, info *slack.Info, prefi
 	text := strings.TrimPrefix(msg.Text, prefix)
 	text = strings.TrimSpace(text)
 	text = strings.ToLower(text)
+
 	if strings.HasSuffix(text, "scheduled") {
 		return s.getListItems(scheduledListID)
 	} else if strings.HasSuffix(text, "ideas") {
@@ -116,6 +120,8 @@ func (s *server) processMessage(msg *slack.MessageEvent, info *slack.Info, prefi
 		return getHelp(), nil
 	} else if strings.HasPrefix(text, "wake up") {
 		return wakeUp(text, slack)
+	} else if strings.HasPrefix(text, "<https://www.meetup.com/") {
+		return s.addMeetup(&http.Client{}, text)
 	}
 	return getContribute(), nil
 }
@@ -145,4 +151,32 @@ func (s *server) addIdea(title string) (string, error) {
 	}
 
 	return "easy, your idea is in there!", nil
+}
+
+func (s *server) addMeetup(client *http.Client, url string) (string, error) {
+	url = strings.TrimPrefix(url, "<")
+	url = strings.TrimSuffix(url, ">")
+
+	resp, err := client.Get(url)
+	if err != nil {
+		return "", errors.Wrapf(err, "Could not make request to %s", url)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return "", errors.Wrapf(err, "Could not read request for %s", url)
+	}
+
+	d := string(data)
+	st := strings.Index(d, "property=\"og:title\" content=")
+	fin := strings.Index(d[st+28:], "/>")
+	title := d[st+29:st+27+fin] + " - " + url
+
+	err = s.trello.CreateCard(&trello.Card{Name: title, IDList: meetupsListId}, trello.Defaults())
+	if err != nil {
+		return "", errors.Wrapf(err, "Could not create card with title: %s", title)
+	}
+
+	return "looks like you just shared a meetup, I've added it to the trello board for you :)", nil
 }
