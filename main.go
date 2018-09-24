@@ -15,7 +15,7 @@ import (
 const (
 	ideasListID     = "5b613db79ea6a782ac173a48"
 	scheduledListID = "5b613dbfd923da512f85263b"
-	meetupsListId   = "5b6140b0ff2ec75df864657f"
+	meetupsListID   = "5b6140b0ff2ec75df864657f"
 )
 
 func main() {
@@ -153,6 +153,7 @@ func (s *server) addIdea(title string) (string, error) {
 	return "easy, your idea is in there!", nil
 }
 
+// TODO: replace with call to api.meetup.com, also add the date to the trello card
 func (s *server) addMeetup(client *http.Client, url string) (string, error) {
 	url = strings.TrimPrefix(url, "<")
 	url = strings.TrimSuffix(url, ">")
@@ -173,7 +174,7 @@ func (s *server) addMeetup(client *http.Client, url string) (string, error) {
 	fin := strings.Index(d[st+28:], "/>")
 	title := d[st+29:st+27+fin] + " - " + url
 
-	err = s.trello.CreateCard(&trello.Card{Name: title, IDList: meetupsListId}, trello.Defaults())
+	err = s.trello.CreateCard(&trello.Card{Name: title, IDList: meetupsListID}, trello.Defaults())
 	if err != nil {
 		return "", errors.Wrapf(err, "Could not create card with title: %s", title)
 	}
