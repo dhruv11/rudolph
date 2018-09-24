@@ -7,6 +7,7 @@ import (
 	"github.com/adlio/trello"
 	"github.com/dhruv11/rudolph/mocks"
 	"github.com/nlopes/slack"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -33,6 +34,8 @@ func TestAddInt(t *testing.T) {
 		return text == "easy, your idea is in there!"
 	}), mock.Anything).Return(nil)
 
+	trelloClient.On("GetList", mock.Anything, mock.Anything).Return(&trello.List{}, errors.New("throwing so we can skip this bit"))
+
 	trelloClient.On("CreateCard", mock.MatchedBy(func(card *trello.Card) bool {
 		return card.Name == "kal was here"
 	}), mock.Anything).Return(nil)
@@ -55,9 +58,10 @@ func TestAddInt(t *testing.T) {
 
 func TestHelpInt(t *testing.T) {
 	rtm := new(mocks.SlackRTMInterface)
+	trelloClient := new(mocks.TrelloClient)
 
 	srv := server{
-		trello: nil,
+		trello: trelloClient,
 		slack:  rtm,
 		done:   make(chan struct{}),
 	}
@@ -74,6 +78,8 @@ func TestHelpInt(t *testing.T) {
 	rtm.On("NewOutgoingMessage", mock.MatchedBy(func(text string) bool {
 		return text == "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help"
 	}), mock.Anything).Return(nil)
+
+	trelloClient.On("GetList", mock.Anything, mock.Anything).Return(&trello.List{}, errors.New("throwing so we can skip this bit"))
 
 	srv.start()
 
@@ -92,9 +98,10 @@ func TestHelpInt(t *testing.T) {
 
 func TestContributeInt(t *testing.T) {
 	rtm := new(mocks.SlackRTMInterface)
+	trelloClient := new(mocks.TrelloClient)
 
 	srv := server{
-		trello: nil,
+		trello: trelloClient,
 		slack:  rtm,
 		done:   make(chan struct{}),
 	}
@@ -111,6 +118,8 @@ func TestContributeInt(t *testing.T) {
 	rtm.On("NewOutgoingMessage", mock.MatchedBy(func(text string) bool {
 		return text == "Sorry buddy, I don't know how to do that yet, why don't you contribute to my code base? \nhttps://github.com/dhruv11/rudolph\nI can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help"
 	}), mock.Anything).Return(nil)
+
+	trelloClient.On("GetList", mock.Anything, mock.Anything).Return(&trello.List{}, errors.New("throwing so we can skip this bit"))
 
 	srv.start()
 

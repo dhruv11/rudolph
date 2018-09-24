@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/adlio/trello"
 	"github.com/nlopes/slack"
@@ -44,6 +45,15 @@ func newServer() server {
 
 func (s *server) start() {
 	fmt.Println("Starting")
+
+	// check all external meetups and send out a reminder for any today
+	resp, err := s.getMeetupReminders()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+	} else if resp != "" {
+		time.Sleep(1000 * time.Millisecond)
+		s.slack.SendMessage(s.slack.NewOutgoingMessage(resp, "CBLRCPPRQ"))
+	}
 
 	go func(done chan struct{}, s *server) {
 		for {
@@ -133,6 +143,26 @@ func (s *server) getListItems(listID string) (string, error) {
 	}
 
 	var response strings.Builder
+	for _, t := range titles {
+		response.WriteString(t)
+		response.WriteString("\n")
+	}
+
+	return response.String(), nil
+}
+
+func (s *server) getMeetupReminders() (string, error) {
+	titles, err := getCardsDueToday(s.trello, meetupsListID)
+	if err != nil {
+		return "", errors.Wrapf(err, "Could not get card titles for list: %s", meetupsListID)
+	}
+
+	if len(titles) == 0 {
+		return "", nil
+	}
+
+	var response strings.Builder
+	response.WriteString("It's your lucky day, we have a meetup later today:\n")
 	for _, t := range titles {
 		response.WriteString(t)
 		response.WriteString("\n")
