@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -137,14 +138,14 @@ func (s *server) processMessage(msg *slack.MessageEvent, info *slack.Info, prefi
 }
 
 func (s *server) getListItems(listID string) (string, error) {
-	titles, err := getCardTitles(s.trello, listID)
+	cards, err := getCards(s.trello, listID)
 	if err != nil {
 		return "", errors.Wrapf(err, "Could not get card titles for list: %s", listID)
 	}
 
 	var response strings.Builder
-	for _, t := range titles {
-		response.WriteString(t)
+	for _, c := range cards {
+		response.WriteString(c.Name)
 		response.WriteString("\n")
 	}
 
@@ -152,22 +153,28 @@ func (s *server) getListItems(listID string) (string, error) {
 }
 
 func (s *server) getMeetupReminders() (string, error) {
-	titles, err := getCardsDueToday(s.trello, meetupsListID)
+	cards, err := getCards(s.trello, meetupsListID)
 	if err != nil {
 		return "", errors.Wrapf(err, "Could not get card titles for list: %s", meetupsListID)
 	}
 
-	if len(titles) == 0 {
+	var response strings.Builder
+	var title = "It's your lucky day, we have a meetup later today:\n"
+	response.WriteString(title)
+	for _, c := range cards {
+		y, m, d := c.Due.Date()
+
+		// TODO: fix bug at month's boundary, localize date
+		yy, mm, dd := time.Now().Date()
+		if y == yy && m == mm && d == dd+1 {
+			response.WriteString(c.Name)
+			response.WriteString("\n")
+		}
+	}
+
+	if response.String() == title {
 		return "", nil
 	}
-
-	var response strings.Builder
-	response.WriteString("It's your lucky day, we have a meetup later today:\n")
-	for _, t := range titles {
-		response.WriteString(t)
-		response.WriteString("\n")
-	}
-
 	return response.String(), nil
 }
 
@@ -183,10 +190,15 @@ func (s *server) addIdea(title string) (string, error) {
 	return "easy, your idea is in there!", nil
 }
 
+type meetup struct {
+	name string
+}
+
 // TODO: replace with call to api.meetup.com, also add the date to the trello card
 func (s *server) addMeetup(client *http.Client, url string) (string, error) {
 	url = strings.TrimPrefix(url, "<")
 	url = strings.TrimSuffix(url, ">")
+	url = strings.Replace(url, "https://meetup.com", "http://api.meetup.com", -1)
 
 	resp, err := client.Get(url)
 	if err != nil {
@@ -199,15 +211,22 @@ func (s *server) addMeetup(client *http.Client, url string) (string, error) {
 		return "", errors.Wrapf(err, "Could not read request for %s", url)
 	}
 
-	d := string(data)
-	st := strings.Index(d, "property=\"og:title\" content=")
-	fin := strings.Index(d[st+28:], "/>")
-	title := d[st+29:st+27+fin] + " - " + url
-
-	err = s.trello.CreateCard(&trello.Card{Name: title, IDList: meetupsListID}, trello.Defaults())
-	if err != nil {
-		return "", errors.Wrapf(err, "Could not create card with title: %s", title)
+	var m meetup
+	e := json.Unmarshal(data, &m)
+	if e != nil {
+		fmt.Println("couldnt deserialize" + e.Error())
 	}
+	fmt.Printf("got the name %s \n", m.name)
+
+	// d := string(data)
+	// st := strings.Index(d, "property=\"og:title\" content=")
+	// fin := strings.Index(d[st+28:], "/>")
+	// title := d[st+29:st+27+fin] + " - " + url
+
+	// err = s.trello.CreateCard(&trello.Card{Name: title, IDList: meetupsListID}, trello.Defaults())
+	// if err != nil {
+	// 	return "", errors.Wrapf(err, "Could not create card with title: %s", title)
+	// }
 
 	return "looks like you just shared a meetup, I've added it to the trello board for you :)", nil
 }
