@@ -191,24 +191,24 @@ func (s *server) addIdea(title string) (string, error) {
 }
 
 type meetup struct {
-	name string
+	Name string
 }
 
-// TODO: replace with call to api.meetup.com, also add the date to the trello card
+// TODO: add the date to the trello card
 func (s *server) addMeetup(client *http.Client, url string) (string, error) {
 	url = strings.TrimPrefix(url, "<")
 	url = strings.TrimSuffix(url, ">")
-	url = strings.Replace(url, "https://meetup.com", "http://api.meetup.com", -1)
+	apiURL := strings.Replace(url, "https://www.meetup.com", "http://api.meetup.com", -1)
 
-	resp, err := client.Get(url)
+	resp, err := client.Get(apiURL)
 	if err != nil {
-		return "", errors.Wrapf(err, "Could not make request to %s", url)
+		return "", errors.Wrapf(err, "Could not make request to %s", apiURL)
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
-		return "", errors.Wrapf(err, "Could not read request for %s", url)
+		return "", errors.Wrapf(err, "Could not read request for %s", apiURL)
 	}
 
 	var m meetup
@@ -216,17 +216,11 @@ func (s *server) addMeetup(client *http.Client, url string) (string, error) {
 	if e != nil {
 		fmt.Println("couldnt deserialize" + e.Error())
 	}
-	fmt.Printf("got the name %s \n", m.name)
 
-	// d := string(data)
-	// st := strings.Index(d, "property=\"og:title\" content=")
-	// fin := strings.Index(d[st+28:], "/>")
-	// title := d[st+29:st+27+fin] + " - " + url
-
-	// err = s.trello.CreateCard(&trello.Card{Name: title, IDList: meetupsListID}, trello.Defaults())
-	// if err != nil {
-	// 	return "", errors.Wrapf(err, "Could not create card with title: %s", title)
-	// }
+	err = s.trello.CreateCard(&trello.Card{Name: m.Name + " - " + url, IDList: meetupsListID}, trello.Defaults())
+	if err != nil {
+		return "", errors.Wrapf(err, "Could not create card for meetup: %s", url)
+	}
 
 	return "looks like you just shared a meetup, I've added it to the trello board for you :)", nil
 }
