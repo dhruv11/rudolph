@@ -162,13 +162,16 @@ func (s *server) getMeetupReminders() (string, error) {
 	var title = "It's your lucky day, we have a meetup later today:\n"
 	response.WriteString(title)
 	for _, c := range cards {
-		y, m, d := c.Due.Date()
+		t := c.Due
+		if t != nil {
+			y, m, d := t.Date()
 
-		// TODO: fix bug at month's boundary, localize date
-		yy, mm, dd := time.Now().Date()
-		if y == yy && m == mm && d == dd+1 {
-			response.WriteString(c.Name)
-			response.WriteString("\n")
+			// TODO: fix bug at month's boundary, localize date
+			yy, mm, dd := time.Now().Date()
+			if y == yy && m == mm && d == dd+1 {
+				response.WriteString(c.Name)
+				response.WriteString("\n")
+			}
 		}
 	}
 
