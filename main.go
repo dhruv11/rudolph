@@ -163,7 +163,7 @@ func (s *server) getMeetupReminders() (string, error) {
 	var title = "It's your lucky day, we have a meetup later today:\n"
 	response.WriteString(title)
 
-	loc, err := time.LoadLocation("Antarctica/McMurdo")
+	loc, err := time.LoadLocation("Pacific/Fiji")
 	if err != nil {
 		fmt.Println("Could not find timezone")
 		return "", nil
