@@ -194,10 +194,10 @@ func (s *server) addIdea(title string) (string, error) {
 }
 
 type meetup struct {
-	Name string
+	Name       string
+	Local_date string
 }
 
-// TODO: add the date to the trello card
 func (s *server) addMeetup(client *http.Client, url string) (string, error) {
 	url = strings.TrimPrefix(url, "<")
 	url = strings.TrimSuffix(url, ">")
@@ -220,7 +220,12 @@ func (s *server) addMeetup(client *http.Client, url string) (string, error) {
 		fmt.Println("couldnt deserialize" + e.Error())
 	}
 
-	err = s.trello.CreateCard(&trello.Card{Name: m.Name + " - " + url, IDList: meetupsListID}, trello.Defaults())
+	d, e := time.Parse("2006-01-02", m.Local_date)
+	if e != nil {
+		fmt.Println("error when parsing date: " + e.Error())
+	}
+
+	err = s.trello.CreateCard(&trello.Card{Name: m.Name + " - " + url, IDList: meetupsListID, Due: &d}, trello.Defaults())
 	if err != nil {
 		return "", errors.Wrapf(err, "Could not create card for meetup: %s", url)
 	}
