@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -161,14 +162,20 @@ func (s *server) getMeetupReminders() (string, error) {
 	var response strings.Builder
 	var title = "It's your lucky day, we have a meetup later today:\n"
 	response.WriteString(title)
+
+	loc, err := time.LoadLocation("Antarctica/McMurdo")
+	if err != nil {
+		fmt.Println("Could not find timezone")
+		return "", nil
+	}
+	yy, mm, dd := time.Now().In(loc).Date()
+	fmt.Println("time in akl is: " + strconv.Itoa(yy) + mm.String() + strconv.Itoa(dd))
+
 	for _, c := range cards {
 		t := c.Due
 		if t != nil {
 			y, m, d := t.Date()
-
-			// TODO: fix bug at month's boundary, localize date
-			yy, mm, dd := time.Now().Date()
-			if y == yy && m == mm && d == dd+1 {
+			if y == yy && m == mm && d == dd {
 				response.WriteString(c.Name)
 				response.WriteString("\n")
 			}
