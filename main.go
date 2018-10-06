@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -169,7 +168,6 @@ func (s *server) getMeetupReminders() (string, error) {
 		return "", nil
 	}
 	yy, mm, dd := time.Now().In(loc).Add(time.Hour * 13).Date()
-	fmt.Println("time in akl is: " + strconv.Itoa(yy) + mm.String() + strconv.Itoa(dd))
 
 	for _, c := range cards {
 		t := c.Due
