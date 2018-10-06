@@ -163,12 +163,12 @@ func (s *server) getMeetupReminders() (string, error) {
 	var title = "It's your lucky day, we have a meetup later today:\n"
 	response.WriteString(title)
 
-	loc, err := time.LoadLocation("Pacific/Fiji")
+	loc, err := time.LoadLocation("UTC")
 	if err != nil {
 		fmt.Println("Could not find timezone")
 		return "", nil
 	}
-	yy, mm, dd := time.Now().In(loc).Date()
+	yy, mm, dd := time.Now().In(loc).Add(time.Hour * 13).Date()
 	fmt.Println("time in akl is: " + strconv.Itoa(yy) + mm.String() + strconv.Itoa(dd))
 
 	for _, c := range cards {
