@@ -10,6 +10,7 @@ type SlackRTMInterface interface {
 	GetIncomingEvents() chan slack.RTMEvent
 	GetUserInfo(user string) (*slack.User, error)
 	OpenIMChannel(user string) (bool, bool, string, error)
+	GetChannelInfo(channelID string) (*slack.Channel, error)
 }
 
 type slackRTM struct {
@@ -31,6 +32,10 @@ func newSlackRTM(token string) *slackRTM {
 
 func (s *slackRTM) OpenIMChannel(user string) (bool, bool, string, error) {
 	return s.rtm.OpenIMChannel(user)
+}
+
+func (s *slackRTM) GetChannelInfo(channelID string) (*slack.Channel, error) {
+	return s.rtm.GetChannelInfo(channelID)
 }
 
 func (s *slackRTM) GetUserInfo(user string) (*slack.User, error) {

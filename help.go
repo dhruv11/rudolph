@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/rand"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -23,7 +24,7 @@ func wakeUp(user string, slack SlackRTMInterface) (string, error) {
 
 	_, _, c, err := slack.OpenIMChannel(user)
 	if err != nil {
-		return "", errors.Wrapf(err, "Could not oepn an IM channel to: %s", user)
+		return "", errors.Wrapf(err, "Could not open an IM channel to: %s", user)
 	}
 	slack.SendMessage(slack.NewOutgoingMessage("buddy stop napping at work, people are looking for you...", c))
 
@@ -32,4 +33,18 @@ func wakeUp(user string, slack SlackRTMInterface) (string, error) {
 		return "I've just pinged them for you :)", nil
 	}
 	return "I've just pinged " + u.RealName + " for you :)", nil
+}
+
+func getRandomUserFromChannel(channel string, slack SlackRTMInterface) (string, error) {
+	c, err := slack.GetChannelInfo(channel)
+	if err != nil {
+		return "", errors.Wrapf(err, "Could not retrieve channel info for: %s", channel)
+	}
+	i := rand.Intn(len(c.Members))
+
+	u, err := slack.GetUserInfo(c.Members[i])
+	if err != nil {
+		return "", err
+	}
+	return u.RealName, nil
 }

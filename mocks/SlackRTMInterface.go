@@ -10,6 +10,29 @@ type SlackRTMInterface struct {
 	mock.Mock
 }
 
+// GetChannelInfo provides a mock function with given fields: channelID
+func (_m *SlackRTMInterface) GetChannelInfo(channelID string) (*slack.Channel, error) {
+	ret := _m.Called(channelID)
+
+	var r0 *slack.Channel
+	if rf, ok := ret.Get(0).(func(string) *slack.Channel); ok {
+		r0 = rf(channelID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*slack.Channel)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(channelID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetIncomingEvents provides a mock function with given fields:
 func (_m *SlackRTMInterface) GetIncomingEvents() chan slack.RTMEvent {
 	ret := _m.Called()
