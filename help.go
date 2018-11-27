@@ -12,6 +12,12 @@ func getHelp() string {
 	return helpText
 }
 
+func getRating() string {
+	r := [5]string{"Needs Improvement :(", "Inconsistent Performance :(", "Valued Contributor", "High Impact :)", "Exceptional Contributor :)"}
+	i := rand.Intn(len(r))
+	return r[i]
+}
+
 func getContribute() string {
 	contributeText := "Sorry buddy, I don't know how to do that yet, why don't you contribute to my code base? \nhttps://github.com/dhruv11/rudolph\n"
 	return contributeText + getHelp()

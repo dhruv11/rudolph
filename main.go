@@ -135,6 +135,8 @@ func (s *server) processMessage(msg *slack.MessageEvent, info *slack.Info, prefi
 		return getRandomUserFromChannel(msg.Channel, slack)
 	} else if strings.HasPrefix(text, "<https://www.meetup.com/") {
 		return s.addMeetup(&http.Client{}, text)
+	} else if strings.HasSuffix(text, "performance rating") {
+		return getRating(), nil
 	}
 	return getContribute(), nil
 }
