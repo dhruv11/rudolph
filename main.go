@@ -101,7 +101,7 @@ func (s *server) start() {
 					close(done)
 
 				default:
-					// do nothing
+					// do
 				}
 			}
 		}
