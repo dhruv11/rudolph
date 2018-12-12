@@ -131,6 +131,8 @@ func (s *server) processMessage(msg *slack.MessageEvent, info *slack.Info, prefi
 		return getHelp(), nil
 	} else if strings.HasPrefix(text, "wake up") {
 		return wakeUp(text, slack)
+	} else if strings.HasPrefix(text, "who") && strings.HasSuffix(text, "risk") {
+		return getRisk(), nil
 	} else if strings.HasPrefix(text, "who") {
 		return getRandomUserFromChannel(msg.Channel, slack)
 	} else if strings.HasPrefix(text, "<https://www.meetup.com/") {

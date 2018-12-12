@@ -18,6 +18,10 @@ func getRating() string {
 	return r[i]
 }
 
+func getRisk() string {
+	return "Risk is collectively owned by everyone at ASB...\nexcept for Breyten and Dhruv, they've owned enough Risk till 2021"
+}
+
 func getContribute() string {
 	contributeText := "Sorry buddy, I don't know how to do that yet, why don't you contribute to my code base? \nhttps://github.com/dhruv11/rudolph\n"
 	return contributeText + getHelp()
