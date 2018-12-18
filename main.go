@@ -117,7 +117,9 @@ func (s *server) processMessage(msg *slack.MessageEvent, info *slack.Info, prefi
 	text = strings.TrimSpace(text)
 	text = strings.ToLower(text)
 
-	if strings.HasSuffix(text, "scheduled") {
+	if text == "who wants to carpool tomorrow" {
+		return getPassengers(&http.Client{})
+	} else if strings.HasSuffix(text, "scheduled") {
 		return s.getListItems(scheduledListID)
 	} else if strings.HasSuffix(text, "ideas") {
 		return s.getListItems(ideasListID)
