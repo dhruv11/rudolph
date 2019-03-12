@@ -8,7 +8,7 @@ import (
 )
 
 func getHelp() string {
-	helpText := "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help"
+	helpText := "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Recognizing a HWR behaviour - @rudolph hwr <user handle> <2 letter behaviour initial> <message> \n\tEg. @rudolph hwr @ruskin.dantra CC It was awesome when you rapped for all of us \n Help - @rudolph help"
 	return helpText
 }
 
@@ -43,6 +43,35 @@ func wakeUp(user string, slack SlackRTMInterface) (string, error) {
 		return "I've just pinged them for you :)", nil
 	}
 	return "I've just pinged " + u.RealName + " for you :)", nil
+}
+
+func hwr(text string, slack SlackRTMInterface) (string, error) {
+	text = strings.TrimPrefix(text, "hwr <@")
+	nameEnd := strings.Index(text, ">")
+	name := text[0:nameEnd]
+	name = strings.ToUpper(name)
+	behaviours := map[string]string{
+		"rr": "recognized reveller",
+		"dd": "dedicated discoverer",
+		"cc": "crystal clear carer",
+		"pp": "punter passion",
+		"ge": "gutsy evolver",
+		"ra": "rapid adapter",
+	}
+	b := text[nameEnd+2 : nameEnd+4]
+	m := text[nameEnd+5:]
+
+	_, _, c, err := slack.OpenIMChannel(name)
+	if err != nil {
+		return "", errors.Wrapf(err, "Could not open an IM channel to: %s", name)
+	}
+	slack.SendMessage(slack.NewOutgoingMessage("Wohoo! Someone just nominated you for being a "+behaviours[b]+"!\n They said \""+m+"\"", c))
+
+	u, err := slack.GetUserInfo(name)
+	if err != nil {
+		return "I've passed on your feedback anonymously! \n Good on you for being a Recognized Reveller :)", nil
+	}
+	return "I've passed on your feedback to " + u.RealName + " anonymously! \n Good on you for being a Recognized Reveller :)", nil
 }
 
 func getRandomUserFromChannel(channel string, slack SlackRTMInterface) (string, error) {

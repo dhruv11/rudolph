@@ -76,7 +76,7 @@ func TestHelpInt(t *testing.T) {
 
 	// Expectations
 	rtm.On("NewOutgoingMessage", mock.MatchedBy(func(text string) bool {
-		return text == "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help"
+		return text == "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Recognizing a HWR behaviour - @rudolph hwr <user handle> <2 letter behaviour initial> <message> \n\tEg. @rudolph hwr @ruskin.dantra CC It was awesome when you rapped for all of us \n Help - @rudolph help"
 	}), mock.Anything).Return(nil)
 
 	trelloClient.On("GetList", mock.Anything, mock.Anything).Return(&trello.List{}, errors.New("throwing so we can skip this bit"))
@@ -116,7 +116,7 @@ func TestContributeInt(t *testing.T) {
 
 	// Expectations
 	rtm.On("NewOutgoingMessage", mock.MatchedBy(func(text string) bool {
-		return text == "Sorry buddy, I don't know how to do that yet, why don't you contribute to my code base? \nhttps://github.com/dhruv11/rudolph\nI can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help"
+		return text == "Sorry buddy, I don't know how to do that yet, why don't you contribute to my code base? \nhttps://github.com/dhruv11/rudolph\nI can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Recognizing a HWR behaviour - @rudolph hwr <user handle> <2 letter behaviour initial> <message> \n\tEg. @rudolph hwr @ruskin.dantra CC It was awesome when you rapped for all of us \n Help - @rudolph help"
 	}), mock.Anything).Return(nil)
 
 	trelloClient.On("GetList", mock.Anything, mock.Anything).Return(&trello.List{}, errors.New("throwing so we can skip this bit"))

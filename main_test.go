@@ -12,7 +12,7 @@ import (
 )
 
 func TestGetHelp(t *testing.T) {
-	expected := "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help"
+	expected := "I can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Recognizing a HWR behaviour - @rudolph hwr <user handle> <2 letter behaviour initial> <message> \n\tEg. @rudolph hwr @ruskin.dantra CC It was awesome when you rapped for all of us \n Help - @rudolph help"
 
 	actual := getHelp()
 	if actual != expected {
@@ -21,7 +21,7 @@ func TestGetHelp(t *testing.T) {
 }
 
 func TestGetContribute(t *testing.T) {
-	expected := "Sorry buddy, I don't know how to do that yet, why don't you contribute to my code base? \nhttps://github.com/dhruv11/rudolph\nI can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Help - @rudolph help"
+	expected := "Sorry buddy, I don't know how to do that yet, why don't you contribute to my code base? \nhttps://github.com/dhruv11/rudolph\nI can help you with: \n Fetching ideas - @rudolph ideas \n Fetching scheduled talks - @rudolph scheduled \n Adding an idea: @rudolph add <talk title> \n Dad joke - @rudolph make me laugh \n Recognizing a HWR behaviour - @rudolph hwr <user handle> <2 letter behaviour initial> <message> \n\tEg. @rudolph hwr @ruskin.dantra CC It was awesome when you rapped for all of us \n Help - @rudolph help"
 
 	actual := getContribute()
 	if actual != expected {
